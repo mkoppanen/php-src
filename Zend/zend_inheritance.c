@@ -319,8 +319,14 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 			return 0;
 		}
 
-		/* by-ref constraints on arguments are invariant */
-		if (fe_arg_info->pass_by_reference != proto_arg_info->pass_by_reference) {
+		/* by-ref constraints on arguments are invariant
+		* Internal function could define ZEND_PREFER_REF, which is impossible in userland */
+		if (proto_arg_info->pass_by_reference != ZEND_SEND_BY_VAL) {
+			if (fe_arg_info->pass_by_reference == ZEND_SEND_BY_VAL) {
+				return 0;
+			}
+		}
+		else if (fe_arg_info->pass_by_reference != proto_arg_info->pass_by_reference) {
 			return 0;
 		}
 	}
